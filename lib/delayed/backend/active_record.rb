@@ -17,7 +17,11 @@ module Delayed
         def collapse!
           if !collapse_key.nil?
             job = Delayed::Job.where(:collapse_key => collapse_key, :locked_at => nil).first
-            job.update_attributes(:payload_object => payload_object) unless job.nil?
+            if job.nil?
+              save
+            else
+              job.update_attributes(:payload_object => payload_object) 
+            end
           else
             save
           end
