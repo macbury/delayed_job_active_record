@@ -9,9 +9,19 @@ module Delayed
         include Delayed::Backend::Base
 
         attr_accessible :priority, :run_at, :queue, :payload_object,
-          :failed_at, :locked_at, :locked_by
+          :failed_at, :locked_at, :locked_by, :collapse_key
 
         before_save :set_default_run_at
+
+        # this method will try to find another delayed_job with simmilar collapse_key. If record exists and is not running it will update the payload object, otherwise it will save this record
+        def collapse!
+          if !collapse_key.nil?
+            job = Delayed::Job.where(:collapse_key => collapse_key, :locked_at => nil).first
+            job.update_attributes(:payload_object => payload_object) unless job.nil?
+          else
+            save
+          end
+        end
 
         def self.rails3?
           ::ActiveRecord::VERSION::MAJOR == 3
