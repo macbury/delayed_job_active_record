@@ -16,7 +16,7 @@ module Delayed
         # this method will try to find another delayed_job with simmilar collapse_key. If record exists and is not running it will update the payload object, otherwise it will save this record
         def collapse!
           if !collapse_key.nil?
-            job = Delayed::Job.where(:collapse_key => collapse_key, :locked_at => nil).first
+            job = Delayed::Job.where(:collapse_key => collapse_key, :locked_at => nil, :last_error => nil).first
             if job.nil?
               save
             else
